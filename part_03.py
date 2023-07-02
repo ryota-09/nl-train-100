@@ -83,4 +83,58 @@ with open("./data/jawiki-country.json", "r") as file:
                 template = match.group(1)
                 fields = re.findall(pattern_for_field,template)
                 info = {field.strip(): value.strip() for field, value in fields}
+                # print(info)
+
+
+# 26. 強調マークアップの削除
+# 25の処理時に，テンプレートの値からMediaWikiの強調マークアップ（弱い強調，強調，強い強調のすべて）を除去してテキストに変換せよ
+target_json_data = []
+pattern = re.compile(r"\{\{基礎情報 国\n(.*?)\n\}\}", re.DOTALL)
+pattern_for_field = re.compile(r"^\|(.*?)=(.*?)$", re.MULTILINE)
+
+def remove_markup(text):
+    # 強調マークアップの除去
+    pattern = r"\'{2,5}|\"{2}|\'"
+    text = re.sub(pattern, '', text)
+    return text
+
+with open("./data/jawiki-country.json", "r") as file:
+    for line in file:
+        data = json.loads(line)
+        if 'text' in data.keys():
+            text = data['text']
+            match = re.search(r"\{\{基礎情報 国\n(.*?)\n\}\}", text, re.DOTALL)
+            if match:
+                template = match.group(1)
+                fields = re.findall(pattern_for_field, template)
+                # ここでマークアップの除去を行います
+                info = {remove_markup(field.strip()): remove_markup(value.strip()) for field, value in fields}
+                # print(info)
+
+# 27. 内部リンクの除去
+# 26の処理に加えて，テンプレートの値からMediaWikiの内部リンクマークアップを除去し，テキストに変換せよ
+target_json_data = []
+pattern = re.compile(r"\{\{基礎情報 国\n(.*?)\n\}\}", re.DOTALL)
+pattern_for_field = re.compile(r"^\|(.*?)=(.*?)$", re.MULTILINE)
+
+def remove_markup(text):
+    # 強調マークアップの除去
+    pattern = r"\'{2,5}|\"{2}|\'"
+    pattern = r"\[\[(.*?)\]\]"
+    text = re.sub(pattern, '', text)
+    pattern = r"\[\[(?:[^|]*?\|)??([^|]*?)\]\]"
+    text = re.sub(pattern, '', text)
+    return text
+
+with open("./data/jawiki-country.json", "r") as file:
+    for line in file:
+        data = json.loads(line)
+        if 'text' in data.keys():
+            text = data['text']
+            match = re.search(r"\{\{基礎情報 国\n(.*?)\n\}\}", text, re.DOTALL)
+            if match:
+                template = match.group(1)
+                fields = re.findall(pattern_for_field, template)
+                # ここでマークアップの除去を行います
+                info = {remove_markup(field.strip()): remove_markup(value.strip()) for field, value in fields}
                 print(info)
